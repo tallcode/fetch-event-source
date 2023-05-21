@@ -141,9 +141,7 @@ export function getMessages(
                 case 'data':
                     // if this message already has data, append the new value to the old.
                     // otherwise, just set to the new value:
-                    message.data = message.data
-                        ? message.data + '\n' + value
-                        : value; // otherwise, 
+                    message.data = value; // otherwise, 
                     break;
                 case 'event':
                     message.event = value;
@@ -168,16 +166,29 @@ function concat(a: Uint8Array, b: Uint8Array) {
     res.set(b, a.length);
     return res;
 }
+class Message {
+    _data: string[]
+    event: string
+    id: string
+    retry?: number
+    constructor(){
+        this._data = [];
+        this.event = '';
+        this.id = '';
+        this.retry = undefined;
+    }
+    get data() {
+        return this._data.join('\n');
+    }
+    set data(value) {
+        this._data.push(value)
+    }
+}
 
 function newMessage(): EventSourceMessage {
     // data, event, and id must be initialized to empty strings:
     // https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation
     // retry should be initialized to undefined so we return a consistent shape
     // to the js engine all the time: https://mathiasbynens.be/notes/shapes-ics#takeaways
-    return {
-        data: '',
-        event: '',
-        id: '',
-        retry: undefined,
-    };
+    return new Message();
 }
